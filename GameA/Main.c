@@ -55,13 +55,7 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance,
         return 0;
     }
 
-    windowHandle = CreateWindowExA(
-        WS_EX_CLIENTEDGE,
-        windowClass.lpszClassName,
-        "Window Title",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 240, 120,
-        NULL, NULL, instance, NULL);
+    windowHandle = CreateWindowExA(WS_EX_CLIENTEDGE, windowClass.lpszClassName, "Window Title", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, NULL, NULL, instance, NULL);
 
     if (!windowHandle)
     {
