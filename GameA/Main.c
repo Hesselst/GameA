@@ -8,6 +8,10 @@
 
 #include "Main.h"
 
+BOOL gGameIsRunning;
+
+HANDLE gGameWindow;
+
 int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance, _In_ LPSTR cmdLine, _In_ int showCmd)
 {
     UNREFERENCED_PARAMETER(instance);
@@ -33,10 +37,19 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance,
 
     MSG message = { 0 };
 
-    while (GetMessageA(&message, NULL, 0, 0) > 0)
+    gGameIsRunning = TRUE;
+    while (gGameIsRunning == TRUE)
     {
-        TranslateMessage(&message);
-        DispatchMessageA(&message);
+        while (PeekMessageA(&message, gGameWindow, 0, 0, PM_REMOVE))
+        {
+            DispatchMessageA(&message);
+        }
+
+        ProcessPlayerInput();
+
+        // RenderFrameGraphics();
+
+        Sleep(1);
     }
 
 Exit:
@@ -60,6 +73,8 @@ LRESULT CALLBACK MainWindowProc(_In_ HWND windowHandle, _In_ UINT message, _In_ 
     {
         case WM_CLOSE:
         {
+            gGameIsRunning = FALSE;
+
             PostQuitMessage(0);
             break;
         }
@@ -75,9 +90,6 @@ DWORD CreateMainGameWindow(void)
 
 
     WNDCLASSEXA windowClass = { 0 };
-
-    HWND windowHandle = { 0 };
-
 
 
     windowClass.cbSize = sizeof(WNDCLASSEXA);
@@ -115,10 +127,10 @@ DWORD CreateMainGameWindow(void)
     }
 
 
-    windowHandle = CreateWindowExA(WS_EX_CLIENTEDGE, windowClass.lpszClassName, "Window Title", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, NULL, NULL, GetModuleHandleA(NULL), NULL);
+    gGameWindow = CreateWindowExA(WS_EX_CLIENTEDGE, windowClass.lpszClassName, "Window Title", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, NULL, NULL, GetModuleHandleA(NULL), NULL);
 
 
-    if (!windowHandle)
+    if (!gGameWindow)
     {
         result = GetLastError();
         MessageBoxA(NULL, "Window Registration Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
@@ -143,5 +155,15 @@ BOOL GameIsAlreadyRunning(void)
     else
     {
         return(FALSE);
+    }
+}
+
+void ProcessPlayerInput()
+{
+    short escapeKeyIsDown = GetAsyncKeyState(VK_ESCAPE);
+
+    if (escapeKeyIsDown)
+    {
+        SendMessageA(gGameWindow, WM_CLOSE, 0, 0);
     }
 }
