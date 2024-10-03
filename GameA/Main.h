@@ -8,3 +8,5 @@ LRESULT CALLBACK MainWindowProc(_In_ HWND windowHandle, _In_ UINT message, _In_ 
 DWORD CreateMainGameWindow(void);
 
 BOOL GameIsAlreadyRunning(void);
+
+void ProcessPlayerInput(void);
