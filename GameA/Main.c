@@ -10,9 +10,11 @@
 
 BOOL gGameIsRunning;
 
-HANDLE gGameWindow;
+HWND gGameWindow;
 
-int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance, _In_ LPSTR cmdLine, _In_ int showCmd)
+GAMEBITMAP gDrawingSurface = { 0 };
+
+int WINAPI __stdcall WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance, _In_ LPSTR cmdLine, _In_ int showCmd)
 {
     UNREFERENCED_PARAMETER(instance);
 
@@ -34,6 +36,25 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance,
         goto Exit;
     }
 
+    gDrawingSurface.bitmapInfo.bmiHeader.biSize = sizeof(gDrawingSurface.bitmapInfo.bmiHeader);
+
+    gDrawingSurface.bitmapInfo.bmiHeader.biWidth = GAME_RES_WIDTH;
+
+    gDrawingSurface.bitmapInfo.bmiHeader.biHeight = GAME_RES_HEIGHT;
+
+    gDrawingSurface.bitmapInfo.bmiHeader.biBitCount = GAME_BPP;
+
+    gDrawingSurface.bitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+    gDrawingSurface.bitmapInfo.bmiHeader.biPlanes = 1;
+    gDrawingSurface.memory = VirtualAlloc(NULL, GAME_DRAWING_AREA_MEMORY_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+
+    if (gDrawingSurface.memory == NULL)
+        {
+            MessageBoxA(NULL, "Failed to allocate memory for drawing surface!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+
+            goto Exit;
+         }
 
     MSG message = { 0 };
 
@@ -47,7 +68,7 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE previousInstance,
 
         ProcessPlayerInput();
 
-        // RenderFrameGraphics();
+        RenderFrameGraphics();
 
         Sleep(1);
     }
@@ -127,7 +148,7 @@ DWORD CreateMainGameWindow(void)
     }
 
 
-    gGameWindow = CreateWindowExA(WS_EX_CLIENTEDGE, windowClass.lpszClassName, "Window Title", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 240, 120, NULL, NULL, GetModuleHandleA(NULL), NULL);
+    gGameWindow = CreateWindowExA(WS_EX_CLIENTEDGE, windowClass.lpszClassName, "Window Title", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 640, 480, NULL, NULL, GetModuleHandleA(NULL), NULL);
 
 
     if (!gGameWindow)
@@ -158,7 +179,7 @@ BOOL GameIsAlreadyRunning(void)
     }
 }
 
-void ProcessPlayerInput()
+void ProcessPlayerInput(void)
 {
     short escapeKeyIsDown = GetAsyncKeyState(VK_ESCAPE);
 
@@ -166,4 +187,9 @@ void ProcessPlayerInput()
     {
         SendMessageA(gGameWindow, WM_CLOSE, 0, 0);
     }
+}
+
+void RenderFrameGraphics(void)
+{
+
 }
